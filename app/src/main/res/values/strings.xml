@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">AppAnalyser</string>
+    <string name="app">应用</string>
+    <string name="search_hint">输入应用名或包名进行搜索</string>
+    <string name="is_include_system_app">含系统应用</string>
+    <string name="loading_app_list">加载中…</string>
+    <string name="hash_signatures">MD5：%1s\nSHA1：%2s\nSHA256：%3s</string>
+    <string name="hash_md5">MD5</string>
+    <string name="hash_sha1">SHA1</string>
+    <string name="hash_sha2">SHA256</string>
+    <string name="permissions">Permissions(%1d)</string>
+    <string name="activities">Activities(%1d)</string>
+    <string name="receivers">Receivers(%1d)</string>
+    <string name="services">Services(%1d)</string>
+    <string name="providers">Providers(%1d)</string>
+    <string name="min_sdk">%1d(%2s,%3s)</string>
+    <string name="target_sdk">%1d(%2s,%3s)</string>
+    <string name="need_check_usage_stats_permission"><![CDATA[查看App大小需赋予本应用<使用情况访问权限>,点我获取]]></string>
+    <string name="about">关于</string>
+    <string name="nothing">无</string>
+    <string name="project_url_title">项目地址</string>
+    <string name="project_url">https://www.github.com/floatingmuseum</string>
+    <string name="project_introduce_title">项目介绍</string>
+    <string name="project_introduce">AppAnalyser</string>
+</resources>

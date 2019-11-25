@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape>
+            <solid android:color="@color/divider_line_color" />
+        </shape>
+    </item>
+
+    <item
+        android:top="2dp"
+        android:right="1dp">
+        <shape>
+            <solid android:color="@color/background_color" />
+            <padding
+                android:left="10dp"
+                android:top="4dp"
+                android:right="4dp"
+                android:bottom="4dp" />
+        </shape>
+    </item>
+</layer-list>
