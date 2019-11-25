@@ -19,7 +19,7 @@
     <string name="about">关于</string>
     <string name="nothing">无</string>
     <string name="project_url_title">项目地址</string>
-    <string name="project_url">https://www.github.com/floatingmuseum</string>
+    <string name="project_url">https://github.com/floatingmuseum/AppAnalyser</string>
     <string name="project_introduce_title">项目介绍</string>
     <string name="project_introduce">AppAnalyser</string>
 </resources>
