@@ -5,6 +5,7 @@ import android.app.Activity
 import android.app.usage.StorageStatsManager
 import android.content.Intent
 import android.content.pm.PackageInfo
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -19,6 +20,7 @@ import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.LinearLayoutCompat
+import androidx.core.net.toUri
 import com.floatingmuseum.app.analyser.App
 import com.floatingmuseum.app.analyser.R
 import com.floatingmuseum.app.analyser.utils.*
@@ -68,7 +70,7 @@ class DetailActivity : AppCompatActivity() {
             try {
                 intent?.let { startActivity(intent) }
             } catch (e: Exception) {
-                toastShort(App.context,"启动应用失败:$e")
+                toastShort(App.context, "启动应用失败:$e")
                 e.printStackTrace()
             }
         }
@@ -88,9 +90,12 @@ class DetailActivity : AppCompatActivity() {
             try {
                 intent?.let { startActivity(intent) }
             } catch (e: Exception) {
-                toastShort(App.context,"启动应用中心异常:$e")
+                toastShort(App.context, "启动应用中心异常:$e")
                 e.printStackTrace()
             }
+        }
+        tv_share_app.setOnClickListener {
+            shareApp()
         }
         tv_permissions_title.setOnClickListener {
             showPermissionsInfo()
@@ -183,6 +188,15 @@ class DetailActivity : AppCompatActivity() {
                 tv_providers_title.text =
                     resources.getString(R.string.providers, it.providers?.size ?: 0)
             }
+        }
+    }
+
+    private fun shareApp() {
+        apkSourcePath?.let {
+            val shareIntent = Intent(Intent.ACTION_SEND)
+            shareIntent.putExtra(Intent.EXTRA_STREAM, it.toUri())
+            shareIntent.type = "application/vnd.android.package-archive"
+            startActivity(shareIntent)
         }
     }
 
