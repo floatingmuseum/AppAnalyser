@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="4dp"
+    android:background="@color/background_color"
+    tools:context=".ui.main.MainActivity">
+
+    <TextView
+        android:id="@+id/tv_state"
+        android:gravity="center"
+        android:textSize="20sp"
+        android:text="@string/loading_app_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:textColor="@color/text_color"
+        tools:visibility="gone" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:layout_above="@id/ll_bottom_box"
+        tools:listitem="@layout/item_app"
+        tools:visibility="visible" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:visibility="gone"
+        android:layout_above="@id/ll_bottom_box"
+        android:id="@+id/rv_search_results_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:listitem="@layout/item_app" />
+
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:id="@+id/ll_bottom_box"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="4dp"
+        android:layout_alignParentBottom="true"
+        android:visibility="gone"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        tools:visibility="visible">
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/et_search"
+            android:textColor="@color/text_color"
+            android:textColorHint="@color/text_color"
+            android:textSize="14sp"
+            android:hint="@string/search_hint"
+            android:background="@drawable/et_search_background"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            tools:visibility="visible" />
+
+        <CheckBox
+            android:id="@+id/cb_include_system_app"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentEnd="true"
+            android:enabled="false"
+            android:paddingStart="2dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:paddingEnd="10dp"
+            android:textSize="14sp"
+            android:background="@drawable/checkbox_background"
+            android:textColor="@color/text_color"
+            android:text="@string/is_include_system_app" />
+    </androidx.appcompat.widget.LinearLayoutCompat>
+</RelativeLayout>

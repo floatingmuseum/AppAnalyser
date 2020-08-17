@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="4dp"
+    android:background="@color/background_color">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            style="@style/dash_line_background"
+            android:id="@+id/tv_screen_info"
+            android:padding="4dp"
+            android:textColor="@color/text_color"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            style="@style/dash_line_background"
+            android:id="@+id/tv_screen_adaptation_advice"
+            android:padding="4dp"
+            android:textColor="@color/text_color"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+</ScrollView>

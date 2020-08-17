@@ -8,8 +8,8 @@ import android.graphics.drawable.Drawable
 data class AppItem(
     val name: String,
     val pkg: String,
-    val icon: Drawable,
-    val verName: String,
+    val icon: Drawable?,
+    val verName: String?,
     val isSystem: Boolean,
     var keyWord: String = ""
 )

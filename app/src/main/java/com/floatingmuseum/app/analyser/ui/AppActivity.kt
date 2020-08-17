@@ -1,54 +1,74 @@
 package com.floatingmuseum.app.analyser.ui
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
+import android.content.IntentFilter
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageInfo
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doOnTextChanged
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chad.library.adapter.base.BaseQuickAdapter
 import com.chad.library.adapter.base.listener.OnItemClickListener
-import com.floatingmuseum.app.analyser.entity.AppItem
 import com.floatingmuseum.app.analyser.R
-import com.floatingmuseum.app.analyser.ui.DetailActivity.Companion.DETAIL_PKG_NAME
+import com.floatingmuseum.app.analyser.callback.AppUninstallCallback
+import com.floatingmuseum.app.analyser.entity.AppItem
+import com.floatingmuseum.app.analyser.receiver.AppUninstallReceiver
 import com.floatingmuseum.app.analyser.utils.*
 import com.uber.autodispose.android.lifecycle.autoDispose
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_app.*
+import kotlinx.coroutines.*
 import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
-class MainActivity : AppCompatActivity() {
+/**
+ * Created by Floatingmuseum on 2019-12-09.
+ */
+class AppActivity : AppCompatActivity(), AppUninstallCallback {
 
     companion object {
-        private const val TAG = "MainActivity"
+        private const val TAG = "AppActivity"
         private const val SHOW_TV_STATE = 0
         private const val SHOW_RV_CONTAINER = 1
         private const val SHOW_RV_SEARCH_RESULTS_CONTAINER = 2
+
+        const val TYPE_APP_SYSTEM = 0
+        const val TYPE_APP_THIRD = 1
     }
 
+    private var size = 0
+    private var analyzedSize = 0
+    private var loadAppListJob: Job? = null
+    private var uninstallReceiver: AppUninstallReceiver? = null
     private val data = mutableListOf<AppItem>()
     private val searchData = mutableListOf<AppItem>()
-    private val dataMap = hashMapOf<Int, MutableList<AppItem>>()
-    private lateinit var adapter: MainAdapter
+    private val dataMap = hashMapOf<Int, MutableList<AppItem>>(
+        TYPE_APP_SYSTEM to mutableListOf(),
+        TYPE_APP_THIRD to mutableListOf()
+    )
+    private lateinit var adapter: AppAdapter
     private lateinit var searchResultsAdapter: SearchResultsAdapter
     private var shouldContainsSystemApp = SPUtil.getBoolean(SP_KEY_CONTAINS_SYSTEM_APP, false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_app)
 
         initView()
-        loadData()
+        loadDataV2()
     }
 
     private fun initView() {
         cb_include_system_app.isChecked = shouldContainsSystemApp
-        adapter = MainAdapter(data)
+        adapter = AppAdapter(data)
         rv_container.adapter = adapter
         rv_container.layoutManager = LinearLayoutManager(this)
         rv_container.addOnItemTouchListener(object : OnItemClickListener() {
@@ -58,8 +78,8 @@ class MainActivity : AppCompatActivity() {
                 position: Int
             ) {
                 Log.d("点击", "OnItemClickListener()...position:$position")
-                val intent = Intent(this@MainActivity, DetailActivity::class.java)
-                intent.putExtra(DETAIL_PKG_NAME, data[position].pkg)
+                val intent = Intent(this@AppActivity, AppDetailActivity::class.java)
+                intent.putExtra(AppDetailActivity.DETAIL_PKG_NAME, data[position].pkg)
                 startActivity(intent)
             }
         })
@@ -73,8 +93,8 @@ class MainActivity : AppCompatActivity() {
                 view: View?,
                 position: Int
             ) {
-                val intent = Intent(this@MainActivity, DetailActivity::class.java)
-                intent.putExtra(DETAIL_PKG_NAME, searchData[position].pkg)
+                val intent = Intent(this@AppActivity, AppDetailActivity::class.java)
+                intent.putExtra(AppDetailActivity.DETAIL_PKG_NAME, searchData[position].pkg)
                 startActivity(intent)
             }
         })
@@ -96,34 +116,55 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadData() {
-        Observable.create<Map<Int, MutableList<AppItem>>> {
-            it.onNext(getAllAppMap())
-        }
-            .subscribeOn(Schedulers.computation())
-            .observeOn(AndroidSchedulers.mainThread())
-            .autoDispose(this)
-            .subscribe { result ->
-                Log.d(TAG, "loadData()...data:$data")
-                result[TYPE_APP_SYSTEM]?.let {
-                    dataMap[TYPE_APP_SYSTEM] = it
+    private fun loadDataV2() {
+        loadAppListJob = GlobalScope.launch(Dispatchers.IO) {
+            val allInstallApp = getInstallPackageInfo()
+            size = allInstallApp.size
+            allInstallApp.forEach { rawApp ->
+                val app = convertPackageInfoToAppItem(rawApp)
+                //更新加载进度
+                withContext(Dispatchers.Main) {
+                    analyzedSize++
+                    tv_state.text = "加载中...$analyzedSize/$size"
                 }
-                result[TYPE_APP_THIRD]?.let {
-                    dataMap[TYPE_APP_THIRD] = it
+                if (app.isSystem) {
+                    dataMap[TYPE_APP_SYSTEM]?.add(app)
+                } else {
+                    dataMap[TYPE_APP_THIRD]?.add(app)
                 }
+            }
+
+            withContext(Dispatchers.Main) {
                 initHeaderView()
                 updateAppList()
                 ll_bottom_box.visibility = View.VISIBLE
                 cb_include_system_app.isEnabled = true
                 setVisibility(SHOW_RV_CONTAINER)
+                registerUninstallReceiver()
             }
+        }
+    }
+
+    private fun convertPackageInfoToAppItem(info: PackageInfo): AppItem {
+        val name = info.applicationInfo.loadLabel(packageManager).toString()
+        val pkg = info.packageName
+        val icon = info.applicationInfo.loadIcon(packageManager)
+        val verName = info.versionName
+        val isSystem = (info.applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM) > 0
+        return AppItem(name, pkg, icon, verName, isSystem)
+    }
+
+    private fun registerUninstallReceiver() {
+        val filter = IntentFilter()
+        filter.addAction(Intent.ACTION_PACKAGE_REMOVED)
+        filter.addAction(Intent.ACTION_PACKAGE_FULLY_REMOVED)
+        filter.addDataScheme("package")
+        uninstallReceiver = AppUninstallReceiver(this)
+        registerReceiver(uninstallReceiver, filter)
     }
 
     private fun initHeaderView() {
         val headerView = LayoutInflater.from(this).inflate(R.layout.item_main_header, null)
-        headerView.findViewById<TextView>(R.id.tv_about).setOnClickListener {
-            startActivity(Intent(this@MainActivity, AboutActivity::class.java))
-        }
         val thirdAppNum = "第三方应用:${dataMap[TYPE_APP_THIRD]?.size ?: 0}个"
         headerView.findViewById<TextView>(R.id.tv_third_app).text = thirdAppNum
         val systemAppNum = "系统应用:${dataMap[TYPE_APP_SYSTEM]?.size ?: 0}个"
@@ -203,5 +244,45 @@ class MainActivity : AppCompatActivity() {
         rv_container.visibility = if (SHOW_RV_CONTAINER == showWhich) View.VISIBLE else View.GONE
         rv_search_results_container.visibility =
             if (SHOW_RV_SEARCH_RESULTS_CONTAINER == showWhich) View.VISIBLE else View.GONE
+    }
+
+    override fun onAppUninstall(uninstallPkg: String) {
+        //移除动画有问题
+        //remove from data list
+        val iterator = data.listIterator()
+        Log.d("主列表移除", "data：$data")
+        while (iterator.hasNext()) {
+            val index = iterator.nextIndex()
+            val item = iterator.next()
+            if (item.pkg == uninstallPkg) {
+                Log.d("主列表移除", "remove index:：$index...item:$item")
+                iterator.remove()
+                adapter.notifyItemRemoved(index)
+                Log.d("主列表移除", "remove range start:：$index...itemCount:${data.size - index}")
+                adapter.notifyItemRangeChanged(index, data.size - index)
+                break
+            }
+        }
+        Log.d("主列表移除", "after remove:：$data")
+
+        //remove from third party app list
+        dataMap[TYPE_APP_THIRD]?.let {
+            val thirdAppIterator = it.iterator()
+            while (thirdAppIterator.hasNext()) {
+                val item = thirdAppIterator.next()
+                if (item.pkg == uninstallPkg) {
+                    thirdAppIterator.remove()
+                    break
+                }
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        uninstallReceiver?.let {
+            unregisterReceiver(it)
+        }
+        loadAppListJob?.cancel()
     }
 }

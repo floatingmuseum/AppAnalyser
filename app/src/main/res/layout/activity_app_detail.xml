@@ -17,9 +17,9 @@
 
             <ImageView
                 android:id="@+id/iv_icon"
-                android:padding="10dp"
-                android:layout_width="110dp"
-                android:layout_height="110dp"
+                android:padding="6pt"
+                android:layout_width="80pt"
+                android:layout_height="80pt"
                 android:background="@drawable/detail_image_background"
                 tools:src="@drawable/ic_icon2" />
 
@@ -36,21 +36,13 @@
 
                     <TextView
                         android:id="@+id/tv_start_app"
-                        android:gravity="center"
-                        android:layout_weight="1"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:textColor="@color/text_color"
+                        style="@style/app_detail_header_text"
                         android:background="@drawable/detail_start_background"
                         android:text="启动" />
 
                     <TextView
                         android:id="@+id/tv_app_setting_page"
-                        android:gravity="center"
-                        android:layout_weight="1"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:textColor="@color/text_color"
+                        style="@style/app_detail_header_text"
                         android:background="@drawable/detail_start_background"
                         android:text="详情页" />
                 </androidx.appcompat.widget.LinearLayoutCompat>
@@ -63,21 +55,13 @@
 
                     <TextView
                         android:id="@+id/tv_app_export"
-                        android:gravity="center"
-                        android:layout_weight="1"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:textColor="@color/text_color"
+                        style="@style/app_detail_header_text"
                         android:background="@drawable/detail_start_background"
                         android:text="导出Apk" />
 
                     <TextView
                         android:id="@+id/tv_app_uninstall"
-                        android:gravity="center"
-                        android:layout_weight="1"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:textColor="@color/text_color"
+                        style="@style/app_detail_header_text"
                         android:background="@drawable/detail_start_background"
                         android:text="卸载" />
                 </androidx.appcompat.widget.LinearLayoutCompat>
@@ -90,21 +74,13 @@
 
                     <TextView
                         android:id="@+id/tv_check_from_market"
-                        android:layout_weight="1"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:textColor="@color/text_color"
+                        style="@style/app_detail_header_text"
                         android:background="@drawable/detail_start_background"
                         android:text="去市场查看" />
 
                     <TextView
                         android:id="@+id/tv_share_app"
-                        android:layout_weight="1"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:textColor="@color/text_color"
+                        style="@style/app_detail_header_text"
                         android:background="@drawable/detail_start_background"
                         android:text="分享" />
                 </androidx.appcompat.widget.LinearLayoutCompat>

@@ -149,6 +149,18 @@ fun getAllApp(): MutableList<AppItem> {
     return appList
 }
 
+fun getInstallPackageInfo():List<PackageInfo>{
+    val results = ArrayList<PackageInfo>()
+    val packageManager = App.context.packageManager
+    try {
+        val packageInfoList = packageManager.getInstalledPackages(0)
+        results.addAll(packageInfoList)
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+    return results
+}
+
 /**
  * Acquire all system applications
  */

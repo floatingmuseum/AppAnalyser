@@ -3,7 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.floatingmuseum.app.analyser">
 
-<!--    发起卸载请求的权限-->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <!--    发起卸载请求的权限-->
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES"/>
     <uses-permission android:name="android.permission.GET_PACKAGE_SIZE"/>
 
@@ -27,7 +28,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".ui.MainActivity">
+        <activity android:name=".ui.main.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -35,8 +36,26 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.DetailActivity"/>
+        <activity android:name=".ui.AppActivity"/>
+        <activity android:name=".ui.AppDetailActivity"/>
         <activity android:name=".ui.AboutActivity" />
+        <activity android:name=".ui.SystemActivity" />
+        <activity android:name=".ui.ScreenActivity" />
+
+        <receiver
+            android:name=".receiver.AppDevicePolicyReceiver"
+            android:description="@string/device_admin_description"
+            android:permission="android.permission.BIND_DEVICE_ADMIN" >
+            <meta-data
+                android:name="android.app.device_admin"
+                android:resource="@xml/device_policies" />
+
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+                <action android:name="android.app.action.DEVICE_ADMIN_DISABLE_REQUESTED" />
+                <action android:name="android.app.action.DEVICE_ADMIN_DISABLED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

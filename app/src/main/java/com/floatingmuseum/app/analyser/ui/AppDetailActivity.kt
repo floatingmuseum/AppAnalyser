@@ -4,8 +4,9 @@ import android.Manifest
 import android.app.Activity
 import android.app.usage.StorageStatsManager
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageInfo
-import android.net.Uri
+import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -23,8 +24,10 @@ import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.net.toUri
 import com.floatingmuseum.app.analyser.App
 import com.floatingmuseum.app.analyser.R
+import com.floatingmuseum.app.analyser.callback.AppUninstallCallback
+import com.floatingmuseum.app.analyser.receiver.AppUninstallReceiver
 import com.floatingmuseum.app.analyser.utils.*
-import kotlinx.android.synthetic.main.activity_detail.*
+import kotlinx.android.synthetic.main.activity_app_detail.*
 import java.io.File
 import java.lang.StringBuilder
 import java.util.*
@@ -32,10 +35,10 @@ import java.util.*
 /**
  * Created by Floatingmuseum on 2019-10-04.
  */
-class DetailActivity : AppCompatActivity() {
+class AppDetailActivity : AppCompatActivity(), AppUninstallCallback {
 
     companion object {
-        private const val TAG = "DetailActivity"
+        private const val TAG = "AppDetailActivity"
         private const val REQUEST_CODE_CHECK_USAGE_STATS = 101
         private const val REQUEST_CODE_WRITE_EXTERNAL_STORAGE = 102
         private const val REQUEST_CODE_CREATE_NEW_FILE = 103
@@ -47,10 +50,16 @@ class DetailActivity : AppCompatActivity() {
     private var pkgInfo: PackageInfo? = null
     private var apkSourcePath: String? = null
     private var sourcePath: String? = null
+    private var uninstallReceiver: AppUninstallReceiver? = null
+
+    override fun getResources(): Resources {
+
+        return AdaptScreenUtil.adaptWidth(super.getResources(), 1080)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_detail)
+        setContentView(R.layout.activity_app_detail)
         intent.getStringExtra(DETAIL_PKG_NAME)?.let {
             if (it.isNotBlank()) {
                 pkg = it
@@ -60,8 +69,18 @@ class DetailActivity : AppCompatActivity() {
                 val startTime2 = System.currentTimeMillis()
                 initData(pkg)
                 Log.d("耗时", "测试2:${System.currentTimeMillis() - startTime2}")
+                registerUninstallReceiver()
             }
         }
+    }
+
+    private fun registerUninstallReceiver() {
+        val filter = IntentFilter()
+        filter.addAction(Intent.ACTION_PACKAGE_REMOVED)
+        filter.addAction(Intent.ACTION_PACKAGE_FULLY_REMOVED)
+        filter.addDataScheme("package")
+        uninstallReceiver = AppUninstallReceiver(this)
+        registerReceiver(uninstallReceiver, filter)
     }
 
     private fun initView(pkg: String?) {
@@ -145,7 +164,7 @@ class DetailActivity : AppCompatActivity() {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     val minSdks = getSdkVersion(it.applicationInfo.minSdkVersion)
                     tv_min_sdk.text = resources.getString(
-                        R.string.min_sdk,
+                        R.string.sdk_ver,
                         minSdks.first,
                         minSdks.second,
                         minSdks.third
@@ -153,7 +172,7 @@ class DetailActivity : AppCompatActivity() {
                 }
                 val targetSdks = getSdkVersion(it.applicationInfo.targetSdkVersion)
                 tv_target_sdk.text = resources.getString(
-                    R.string.target_sdk,
+                    R.string.sdk_ver,
                     targetSdks.first,
                     targetSdks.second,
                     targetSdks.third
@@ -236,6 +255,10 @@ class DetailActivity : AppCompatActivity() {
         }
     }
 
+    private fun test() {
+        apkSourcePath = packageManager.getPackageInfo("pkg", 0).applicationInfo.sourceDir
+    }
+
     private fun updateApkSize() {
         apkSourcePath?.let {
             if (it.isNotBlank()) {
@@ -304,10 +327,9 @@ class DetailActivity : AppCompatActivity() {
         val storageVolumes: List<StorageVolume> = storageManager.storageVolumes
         for (item in storageVolumes) {
             val uuidStr = item.uuid
+//            Caused by: java.lang.IllegalArgumentException: Invalid UUID string: 9249-11FD
             val uuid: UUID =
-                if (uuidStr == null) StorageManager.UUID_DEFAULT else UUID.fromString(
-                    uuidStr
-                )
+                if (uuidStr == null) StorageManager.UUID_DEFAULT else UUID.fromString(uuidStr)
             val storageStats = storageStatsManager.queryStatsForUid(uuid, uid)
             //获取到App的总大小
             appSize = storageStats.appBytes + storageStats.cacheBytes + storageStats.dataBytes
@@ -342,10 +364,12 @@ class DetailActivity : AppCompatActivity() {
             sourcePath = it.applicationInfo.publicSourceDir
         }
         if (!sourcePath.isNullOrBlank()) {
-            startActivityForResult(
-                intent,
-                REQUEST_CODE_CREATE_NEW_FILE
-            )
+            try {
+                startActivityForResult(intent, REQUEST_CODE_CREATE_NEW_FILE)
+            } catch (e: Exception) {
+                toastShort(App.context, "导出失败:${e.message}")
+                e.printStackTrace()
+            }
         }
     }
 
@@ -477,8 +501,17 @@ class DetailActivity : AppCompatActivity() {
         container.addView(contentView)
     }
 
+    override fun onAppUninstall(uninstallPkg: String) {
+        if (pkg == uninstallPkg) {
+            finish()
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
+        uninstallReceiver?.let {
+            unregisterReceiver(it)
+        }
         appSizeHandler?.removeCallbacksAndMessages(null)
         appSizeHandler = null
     }

@@ -11,7 +11,8 @@
     <style name="dash_line_background">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_margin">4dp</item>
+        <item name="android:layout_marginTop">2dp</item>
+        <item name="android:layout_marginBottom">2dp</item>
         <item name="android:padding">4dp</item>
         <item name="android:background">@drawable/dash_line_green_background</item>
         <item name="android:orientation">vertical</item>
@@ -31,5 +32,14 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textIsSelectable">true</item>
+    </style>
+
+    <style name="app_detail_header_text">
+        <item name="android:textSize">10pt</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:textColor">@color/text_color</item>
     </style>
 </resources>

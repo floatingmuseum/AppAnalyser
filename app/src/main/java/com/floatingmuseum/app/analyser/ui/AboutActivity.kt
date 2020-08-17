@@ -21,8 +21,8 @@ class AboutActivity : AppCompatActivity() {
 
     private fun initUI() {
         iv_icon.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_icon2))
-        tv_name.text = getText(R.string.app_name)
-        tv_package_name.text = BuildConfig.APPLICATION_ID
-        tv_ver_name.text = BuildConfig.VERSION_NAME
+        tv_name.text = "名称:${getText(R.string.app_name)}"
+        tv_package_name.text = "包名:${BuildConfig.APPLICATION_ID}"
+        tv_ver_name.text = "版本名:${BuildConfig.VERSION_NAME}"
     }
 }

@@ -1,4 +1,5 @@
 <resources>
+    <integer name="value_type">0</integer>
     <string name="app_name">AppAnalyser</string>
     <string name="app">应用</string>
     <string name="search_hint">输入应用名或包名进行搜索</string>
@@ -13,8 +14,7 @@
     <string name="receivers">Receivers(%1d)</string>
     <string name="services">Services(%1d)</string>
     <string name="providers">Providers(%1d)</string>
-    <string name="min_sdk">%1d(%2s,%3s)</string>
-    <string name="target_sdk">%1d(%2s,%3s)</string>
+    <string name="sdk_ver">%1d(%2s,%3s)</string>
     <string name="need_check_usage_stats_permission"><![CDATA[查看App大小需赋予本应用<使用情况访问权限>,点我获取]]></string>
     <string name="about">关于</string>
     <string name="nothing">无</string>
@@ -22,4 +22,11 @@
     <string name="project_url">https://github.com/floatingmuseum/AppAnalyser</string>
     <string name="project_introduce_title">项目介绍</string>
     <string name="project_introduce">AppAnalyser</string>
+
+
+    <string name="sw_width">default</string>
+    <string name="h_height">default</string>
+    <string name="w_width">default</string>
+
+    <string name="device_admin_description">测试policy</string>
 </resources>
